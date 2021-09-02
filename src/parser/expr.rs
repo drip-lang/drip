@@ -1,6 +1,33 @@
-use super::operators::Op;
 use crate::lexer::TokenKind;
 use crate::parser::Parser;
+
+pub enum Op {
+    Add,
+    Sub,
+    Mul,
+    Div,
+}
+
+impl Op {
+    pub fn binding_power(&self) -> (u8, u8) {
+        match self {
+            Self::Add | Self::Sub => (1, 2),
+            Self::Mul | Self::Div => (3, 4),
+        }
+    }
+}
+
+enum PrefixOp {
+    Neg,
+}
+
+impl PrefixOp {
+    fn binding_power(&self) -> ((), u8) {
+        match self {
+            Self::Neg => ((), 5),
+        }
+    }
+}
 
 pub fn expr(p: &mut Parser) {
     expr_binding_power(p, 0);
@@ -11,6 +38,22 @@ pub fn expr_binding_power(p: &mut Parser, min_binding_power: u8) {
 
     match p.peek() {
         Some(TokenKind::Integer) | Some(TokenKind::Ident) => p.bump(),
+        Some(TokenKind::Minus) => {
+            let op = PrefixOp::Neg;
+            let ((), right_binding_power) = op.binding_power();
+
+            p.bump();
+
+            p.start_node_at(checkpoint, TokenKind::PrefixExpression);
+            expr_binding_power(p, right_binding_power);
+            p.finish_node();
+        }
+        Some(TokenKind::LRoundBracket) => {
+            p.bump();
+            expr_binding_power(p, 0);
+            assert_eq!(p.peek(), Some(TokenKind::RRoundBracket));
+            p.bump();
+        }
         _ => {}
     }
 

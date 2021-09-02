@@ -7,6 +7,7 @@ pub enum TokenKind {
     // remove those
     Root,
     InfixExpression,
+    PrefixExpression,
 
     #[error]
     Error,

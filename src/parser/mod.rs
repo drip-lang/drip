@@ -101,7 +101,7 @@ mod parser_tests {
     }
 
     #[test]
-    fn parse_binding_usage() {
+    fn parse_variable_ref() {
         check(
             "TestIdent1",
             expect![[r#"
@@ -158,6 +158,61 @@ mod parser_tests {
                     Integer@4..5 "3"
                 Minus@5..6 "-"
                 Integer@6..7 "4""#]],
+        );
+    }
+
+    #[test]
+    fn negation_has_higher_binding_power_than_infix_operators() {
+        check(
+            "-20+20",
+            expect![[r#"
+            Root@0..6
+              InfixExpression@0..6
+                PrefixExpression@0..3
+                  Minus@0..1 "-"
+                  Integer@1..3 "20"
+                Plus@3..4 "+"
+                Integer@4..6 "20""#]],
+        );
+    }
+
+    #[test]
+    fn parse_nested_parentheses() {
+        check(
+            "((((((10))))))",
+            expect![[r#"
+            Root@0..14
+              LRoundBracket@0..1 "("
+              LRoundBracket@1..2 "("
+              LRoundBracket@2..3 "("
+              LRoundBracket@3..4 "("
+              LRoundBracket@4..5 "("
+              LRoundBracket@5..6 "("
+              Integer@6..8 "10"
+              RRoundBracket@8..9 ")"
+              RRoundBracket@9..10 ")"
+              RRoundBracket@10..11 ")"
+              RRoundBracket@11..12 ")"
+              RRoundBracket@12..13 ")"
+              RRoundBracket@13..14 ")""#]],
+        );
+    }
+
+    #[test]
+    fn parentheses_affect_precedence() {
+        check(
+            "5*(2+1)",
+            expect![[r#"
+            Root@0..7
+              InfixExpression@0..7
+                Integer@0..1 "5"
+                Star@1..2 "*"
+                LRoundBracket@2..3 "("
+                InfixExpression@3..6
+                  Integer@3..4 "2"
+                  Plus@4..5 "+"
+                  Integer@5..6 "1"
+                RRoundBracket@6..7 ")""#]],
         );
     }
 }
