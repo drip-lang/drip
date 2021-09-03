@@ -111,12 +111,55 @@ name = "drip"
 version = "0.1.0"
 dependencies = [
  "color-eyre",
+ "drip_parser",
+ "drop_bomb",
  "expect-test",
  "eyre",
+ "rowan",
+]
+
+[[package]]
+name = "drip_lexer"
+version = "0.1.0"
+dependencies = [
  "logos",
+ "text-size",
+]
+
+[[package]]
+name = "drip_operator"
+version = "0.1.0"
+
+[[package]]
+name = "drip_parser"
+version = "0.1.0"
+dependencies = [
+ "drip_lexer",
+ "drip_syntax",
+ "drop_bomb",
+ "expect-test",
+ "rowan",
+ "text-size",
+]
+
+[[package]]
+name = "drip_repl"
+version = "0.1.0"
+
+[[package]]
+name = "drip_syntax"
+version = "0.1.0"
+dependencies = [
+ "drip_lexer",
  "num_enum",
  "rowan",
 ]
+
+[[package]]
+name = "drop_bomb"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9bda8e21c04aca2ae33ffc2fd8c23134f3cac46db123ba97bd9d3f3b8a4a85e1"
 
 [[package]]
 name = "expect-test"

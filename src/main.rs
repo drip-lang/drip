@@ -1,11 +1,6 @@
-use crate::parser::Parser;
+use drip_parser::parse;
 use std::io;
 use std::io::Write;
-
-pub mod lexer;
-pub mod parser;
-pub mod repl;
-pub mod syntax;
 
 fn main() -> color_eyre::Result<()> {
     let stdin = io::stdin();
@@ -19,7 +14,7 @@ fn main() -> color_eyre::Result<()> {
 
         stdin.read_line(&mut input)?;
 
-        let parse = Parser::new(&input).parse()?;
+        let parse = parse(&input);
         println!("{}", parse.debug_tree());
 
         input.clear();

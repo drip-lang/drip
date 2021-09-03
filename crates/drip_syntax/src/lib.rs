@@ -1,15 +1,18 @@
-use crate::lexer::TokenKind;
+use drip_lexer::TokenKind;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use std::convert::TryFrom;
-
-#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub enum Drip {}
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, TryFromPrimitive, IntoPrimitive)]
 #[repr(u16)]
 pub enum SyntaxKind {
     Root,
     Error,
+    Comment,
+    Literal,
+    InfixExpr,
+    PrefixExpr,
+    RoundBracketExpr,
+    VariableDef,
 
     // Lang
     Whitespace,
@@ -21,7 +24,7 @@ pub enum SyntaxKind {
     Float,
 
     Bang,
-    Quot,
+    Quest,
 
     Plus,
     Minus,
@@ -66,14 +69,17 @@ pub enum SyntaxKind {
 
     LCurlyBracket,
     RCurlyBracket,
-
-    InfixExpression,
 }
 
 pub type SyntaxNode = rowan::SyntaxNode<Drip>;
+pub type SyntaxElement = rowan::SyntaxElement<Drip>;
+pub type SyntaxToken = rowan::SyntaxToken<Drip>;
+
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub enum Drip {}
 
 impl rowan::Language for Drip {
-    type Kind = TokenKind;
+    type Kind = SyntaxKind;
 
     fn kind_from_raw(raw: rowan::SyntaxKind) -> Self::Kind {
         Self::Kind::try_from(raw.0).unwrap()
@@ -95,7 +101,7 @@ impl From<TokenKind> for SyntaxKind {
             TokenKind::Integer => SyntaxKind::Integer,
             TokenKind::Float => SyntaxKind::Float,
             TokenKind::Bang => SyntaxKind::Bang,
-            TokenKind::Quot => SyntaxKind::Quot,
+            TokenKind::Quest => SyntaxKind::Quest,
             TokenKind::Plus => SyntaxKind::Plus,
             TokenKind::Minus => SyntaxKind::Minus,
             TokenKind::Star => SyntaxKind::Star,
@@ -130,9 +136,7 @@ impl From<TokenKind> for SyntaxKind {
             TokenKind::RSquareBracket => SyntaxKind::LSquareBracket,
             TokenKind::LCurlyBracket => SyntaxKind::RSquareBracket,
             TokenKind::RCurlyBracket => SyntaxKind::LCurlyBracket,
-            _ => {
-                unreachable!()
-            }
+            TokenKind::Comment => SyntaxKind::Comment,
         }
     }
 }

@@ -1,16 +1,13 @@
 use logos::Logos;
-use num_enum::{IntoPrimitive, TryFromPrimitive};
+use std::fmt::{self, Formatter};
 
-#[derive(Logos, Debug, Copy, Clone, PartialEq, Eq, TryFromPrimitive, IntoPrimitive)]
-#[repr(u16)]
+#[derive(Logos, Debug, Copy, Clone, PartialEq, Eq)]
 pub enum TokenKind {
-    // remove those
-    Root,
-    InfixExpression,
-    PrefixExpression,
-
     #[error]
     Error,
+
+    #[regex("//.*")]
+    Comment,
     #[regex("[ \n]+")]
     Whitespace,
     #[regex("[A-Za-z][A-Za-z0-9]*")]
@@ -28,7 +25,7 @@ pub enum TokenKind {
     #[token("!")]
     Bang,
     #[token("?")]
-    Quot,
+    Quest,
     #[token("+")]
     Plus,
     #[token("-")]
@@ -104,42 +101,73 @@ pub enum TokenKind {
     RCurlyBracket,
 }
 
-pub struct Lexer<'a> {
-    pub inner: logos::Lexer<'a, TokenKind>,
-}
-
-impl<'a> Lexer<'a> {
-    pub fn new(input: &'a str) -> Self {
-        Self {
-            inner: TokenKind::lexer(input),
-        }
+impl TokenKind {
+    pub fn is_trivia(self) -> bool {
+        matches!(self, Self::Whitespace | Self::Comment)
     }
 }
 
-impl<'a> Iterator for Lexer<'a> {
-    type Item = (TokenKind, &'a str);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let kind = self.inner.next()?;
-        let text = self.inner.slice();
-
-        Some((kind, text))
-    }
-}
-
-impl From<TokenKind> for rowan::SyntaxKind {
-    fn from(kind: TokenKind) -> Self {
-        Self(kind as u16)
+impl fmt::Display for TokenKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
+            TokenKind::Error => "unrecognized token",
+            TokenKind::Comment => "comment",
+            TokenKind::Whitespace => "whitespace",
+            TokenKind::Ident => "identifier",
+            TokenKind::LetKw => "'let'",
+            TokenKind::FnKw => "'fn'",
+            TokenKind::Integer => "default integer",
+            TokenKind::Float => "default float",
+            TokenKind::Bang => "!",
+            TokenKind::Quest => "'?'",
+            TokenKind::Plus => "'+'",
+            TokenKind::Minus => "'-'",
+            TokenKind::Star => "'*'",
+            TokenKind::Slash => "'/'",
+            TokenKind::Circumflex => "'^'",
+            TokenKind::Circumflex2 => "'^^'",
+            TokenKind::And => "'&'",
+            TokenKind::And2 => "'&&'",
+            TokenKind::Pipe => "'|'",
+            TokenKind::Pipe2 => "'||'",
+            TokenKind::Equals => "'='",
+            TokenKind::Equals2 => "'=='",
+            TokenKind::Equals3 => "'==='",
+            TokenKind::Percent => "'%'",
+            TokenKind::Dollar => "'$'",
+            TokenKind::Hashtag => "'#'",
+            TokenKind::At => "'@'",
+            TokenKind::Underscore => "'_'",
+            TokenKind::Dot => "'.'",
+            TokenKind::Comma => "','",
+            TokenKind::Colon => "':'",
+            TokenKind::Semicolon => "';'",
+            TokenKind::Quote => "'\"'",
+            TokenKind::SingleQuote => "'''",
+            TokenKind::LRoundBracket => "'('",
+            TokenKind::RRoundBracket => "')'",
+            TokenKind::LAngledBracket => "'<'",
+            TokenKind::LAngledBracket2 => "'<<'",
+            TokenKind::RAngledBracket => "'>'",
+            TokenKind::RAngledBracket2 => "'>>'",
+            TokenKind::LSquareBracket => "'['",
+            TokenKind::RSquareBracket => "']'",
+            TokenKind::LCurlyBracket => "'{'",
+            TokenKind::RCurlyBracket => "'}'",
+        })
     }
 }
 
 #[cfg(test)]
 mod lexer_tests {
-    use super::*;
+    use crate::*;
 
-    fn assert(input: &str, token: TokenKind) {
+    fn assert(input: &str, kind: TokenKind) {
         let mut lexer = Lexer::new(input);
-        assert_eq!(lexer.next(), Some((token, input)));
+
+        let token = lexer.next().unwrap();
+        assert_eq!(token.kind, kind);
+        assert_eq!(token.text, input);
     }
 
     #[test]
@@ -224,18 +252,5 @@ mod lexer_tests {
     #[test]
     fn errors() {
         assert("¤", TokenKind::Error);
-    }
-
-    #[test]
-    fn expression() {
-        let input = "5+8*3-2";
-        let mut lexer = Lexer::new(input);
-        assert_eq!(lexer.next(), Some((TokenKind::Integer, "5")));
-        assert_eq!(lexer.next(), Some((TokenKind::Plus, "+")));
-        assert_eq!(lexer.next(), Some((TokenKind::Integer, "8")));
-        assert_eq!(lexer.next(), Some((TokenKind::Star, "*")));
-        assert_eq!(lexer.next(), Some((TokenKind::Integer, "3")));
-        assert_eq!(lexer.next(), Some((TokenKind::Minus, "-")));
-        assert_eq!(lexer.next(), Some((TokenKind::Integer, "2")));
     }
 }

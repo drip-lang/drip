@@ -1,0 +1,12 @@
+[package]
+name = "drip_syntax"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+drip_lexer = { path = "../drip_lexer", version = "0.1" }
+
+num_enum = "0.5.4"
+rowan = "0.13.2"

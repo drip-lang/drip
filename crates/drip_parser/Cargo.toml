@@ -1,20 +1,16 @@
 [package]
-name = "drip"
+name = "drip_parser"
 version = "0.1.0"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[workspace]
-members = ["crates/*"]
-
 [dependencies]
-drip_parser = { path = "crates/drip_parser", version = "0.1"}
-
-rowan = "0.13.2"
-eyre = "0.6.5"
-color-eyre = "0.5.11"
 drop_bomb = "0.1.5"
+rowan = "0.13.2"
+text-size = "1.0.0"
+drip_lexer = { path = "../drip_lexer", version = "0.1" }
+drip_syntax = { path = "../drip_syntax", version = "0.1" }
 
 [dev-dependencies]
 expect-test = "1.0.1"
