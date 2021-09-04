@@ -1,7 +1,0 @@
-fn main() {
-    print_hello()
-}
-
-fn print_hello() {
-    println("hello from function")
-}

@@ -1,7 +1,0 @@
-fn main() {
-    let x = print_hello()
-}
-
-fn simple_value_return() -> i32 {
-    return 6
-}
