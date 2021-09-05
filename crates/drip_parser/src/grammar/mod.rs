@@ -5,6 +5,7 @@ use drip_syntax::SyntaxKind;
 
 pub mod expr;
 pub mod stmt;
+pub mod types;
 
 pub(crate) fn root(p: &mut Parser) -> CompletedMarker {
     let marker = p.start();
@@ -33,7 +34,7 @@ mod tests {
             expect![[r#"
 Root@0..3
   Literal@0..3
-    Integer@0..3 "123""#]],
+    Number@0..3 "123""#]],
         );
     }
 
@@ -45,7 +46,7 @@ Root@0..3
 Root@0..7
   Whitespace@0..3 "   "
   Literal@3..7
-    Integer@3..7 "9876""#]],
+    Number@3..7 "9876""#]],
         );
     }
 
@@ -56,7 +57,7 @@ Root@0..7
             expect![[r#"
 Root@0..6
   Literal@0..6
-    Integer@0..3 "999"
+    Number@0..3 "999"
     Whitespace@3..6 "   ""#]],
         );
     }
@@ -69,19 +70,8 @@ Root@0..6
 Root@0..9
   Whitespace@0..1 " "
   Literal@1..9
-    Integer@1..4 "123"
+    Number@1..4 "123"
     Whitespace@4..9 "     ""#]],
-        );
-    }
-
-    #[test]
-    fn parse_variable_ref() {
-        check(
-            "counter",
-            expect![[r#"
-Root@0..7
-  Literal@0..7
-    Ident@0..7 "counter""#]],
         );
     }
 
@@ -93,10 +83,10 @@ Root@0..7
 Root@0..3
   InfixExpr@0..3
     Literal@0..1
-      Integer@0..1 "1"
+      Number@0..1 "1"
     Plus@1..2 "+"
     Literal@2..3
-      Integer@2..3 "2""#]],
+      Number@2..3 "2""#]],
         );
     }
 
@@ -110,16 +100,16 @@ Root@0..7
     InfixExpr@0..5
       InfixExpr@0..3
         Literal@0..1
-          Integer@0..1 "1"
+          Number@0..1 "1"
         Plus@1..2 "+"
         Literal@2..3
-          Integer@2..3 "2"
+          Number@2..3 "2"
       Plus@3..4 "+"
       Literal@4..5
-        Integer@4..5 "3"
+        Number@4..5 "3"
     Plus@5..6 "+"
     Literal@6..7
-      Integer@6..7 "4""#]],
+      Number@6..7 "4""#]],
         );
     }
 
@@ -132,17 +122,17 @@ Root@0..7
   InfixExpr@0..7
     InfixExpr@0..5
       Literal@0..1
-        Integer@0..1 "1"
+        Number@0..1 "1"
       Plus@1..2 "+"
       InfixExpr@2..5
         Literal@2..3
-          Integer@2..3 "2"
+          Number@2..3 "2"
         Star@3..4 "*"
         Literal@4..5
-          Integer@4..5 "3"
+          Number@4..5 "3"
     Minus@5..6 "-"
     Literal@6..7
-      Integer@6..7 "4""#]],
+      Number@6..7 "4""#]],
         );
     }
 
@@ -155,17 +145,17 @@ Root@0..12
   Whitespace@0..1 " "
   InfixExpr@1..12
     Literal@1..3
-      Integer@1..2 "1"
+      Number@1..2 "1"
       Whitespace@2..3 " "
     Plus@3..4 "+"
     Whitespace@4..7 "   "
     InfixExpr@7..12
       Literal@7..8
-        Integer@7..8 "2"
+        Number@7..8 "2"
       Star@8..9 "*"
       Whitespace@9..10 " "
       Literal@10..12
-        Integer@10..11 "3"
+        Number@10..11 "3"
         Whitespace@11..12 " ""#]],
         );
     }
@@ -183,26 +173,26 @@ Root@0..37
   InfixExpr@1..37
     InfixExpr@1..22
       Literal@1..5
-        Integer@1..2 "1"
+        Number@1..2 "1"
         Whitespace@2..5 "\n  "
       Plus@5..6 "+"
       Whitespace@6..7 " "
       Literal@7..22
-        Integer@7..8 "1"
+        Number@7..8 "1"
         Whitespace@8..9 " "
         Comment@9..19 "// Add one"
         Whitespace@19..22 "\n  "
     Plus@22..23 "+"
     Whitespace@23..24 " "
     Literal@24..37
-      Integer@24..26 "10"
+      Number@24..26 "10"
       Whitespace@26..27 " "
       Comment@27..37 "// Add ten""##]],
         );
     }
 
     #[test]
-    fn do_not_parse_operator_if_gettting_rhs_failed() {
+    fn do_not_parse_operator_if_getting_rhs_failed() {
         check(
             "(1+",
             expect![[r#"
@@ -211,9 +201,9 @@ Root@0..3
     LRoundBracket@0..1 "("
     InfixExpr@1..3
       Literal@1..2
-        Integer@1..2 "1"
+        Number@1..2 "1"
       Plus@2..3 "+"
-error at 2..3: expected default integer, identifier, '-' or '('
+error at 2..3: expected number, identifier, '-' or '('
 error at 2..3: expected ')'"#]],
         );
     }
@@ -227,7 +217,7 @@ Root@0..3
   PrefixExpr@0..3
     Minus@0..1 "-"
     Literal@1..3
-      Integer@1..3 "10""#]],
+      Number@1..3 "10""#]],
         );
     }
 
@@ -241,10 +231,10 @@ Root@0..6
     PrefixExpr@0..3
       Minus@0..1 "-"
       Literal@1..3
-        Integer@1..3 "20"
+        Number@1..3 "20"
     Plus@3..4 "+"
     Literal@4..6
-      Integer@4..6 "20""#]],
+      Number@4..6 "20""#]],
         );
     }
 
@@ -267,13 +257,13 @@ Root@0..14
             RoundBracketExpr@5..9
               LRoundBracket@5..6 "("
               Literal@6..8
-                Integer@6..8 "10"
-              LRoundBracket@8..9 ")"
-            LRoundBracket@9..10 ")"
-          LRoundBracket@10..11 ")"
-        LRoundBracket@11..12 ")"
-      LRoundBracket@12..13 ")"
-    LRoundBracket@13..14 ")""#]],
+                Number@6..8 "10"
+              RRoundBracket@8..9 ")"
+            RRoundBracket@9..10 ")"
+          RRoundBracket@10..11 ")"
+        RRoundBracket@11..12 ")"
+      RRoundBracket@12..13 ")"
+    RRoundBracket@13..14 ")""#]],
         );
     }
 
@@ -285,17 +275,17 @@ Root@0..14
 Root@0..7
   InfixExpr@0..7
     Literal@0..1
-      Integer@0..1 "5"
+      Number@0..1 "5"
     Star@1..2 "*"
     RoundBracketExpr@2..7
       LRoundBracket@2..3 "("
       InfixExpr@3..6
         Literal@3..4
-          Integer@3..4 "2"
+          Number@3..4 "2"
         Plus@4..5 "+"
         Literal@5..6
-          Integer@5..6 "1"
-      LRoundBracket@6..7 ")""#]],
+          Number@5..6 "1"
+      RRoundBracket@6..7 ")""#]],
         );
     }
 

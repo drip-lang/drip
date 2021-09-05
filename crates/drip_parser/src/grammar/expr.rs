@@ -68,7 +68,7 @@ fn expr_binding_power(p: &mut Parser, min_binding_power: u8) -> Option<Completed
 }
 
 fn lhs(p: &mut Parser) -> Option<CompletedMarker> {
-    let marker = if p.at(TokenKind::Integer) {
+    let marker = if p.at(TokenKind::Number) {
         literal(p)
     } else if p.at(TokenKind::Ident) {
         variable_ref(p)
@@ -85,7 +85,7 @@ fn lhs(p: &mut Parser) -> Option<CompletedMarker> {
 }
 
 fn literal(p: &mut Parser) -> CompletedMarker {
-    assert!(p.at(TokenKind::Integer));
+    assert!(p.at(TokenKind::Number));
 
     let marker = p.start();
     p.bump();

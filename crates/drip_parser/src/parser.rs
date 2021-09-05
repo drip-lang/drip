@@ -7,7 +7,7 @@ use drip_lexer::{Token, TokenKind};
 use drip_syntax::SyntaxKind;
 use std::mem;
 
-const RECOVERY_SET: [TokenKind; 1] = [TokenKind::LetKw];
+const RECOVERY_SET: [TokenKind; 1] = [TokenKind::Ident];
 
 pub(crate) struct Parser<'l, 'input> {
     source: Source<'l, 'input>,
@@ -72,9 +72,17 @@ impl<'l, 'input> Parser<'l, 'input> {
         }
     }
 
+    pub fn eat(&mut self, kinds: &[TokenKind]) {
+        self.source.eat(kinds);
+    }
+
     pub fn at(&mut self, kind: TokenKind) -> bool {
         self.expected_token_kinds.push(kind);
         self.peek() == Some(kind)
+    }
+
+    pub fn current(&mut self) -> Option<TokenKind> {
+        self.peek()
     }
 
     pub fn at_set(&mut self, set: &[TokenKind]) -> bool {

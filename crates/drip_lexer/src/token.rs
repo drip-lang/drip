@@ -10,17 +10,27 @@ pub enum TokenKind {
     Comment,
     #[regex("[ \n]+")]
     Whitespace,
-    #[regex("[A-Za-z][A-Za-z0-9]*")]
+    #[regex("[/\\p{L}/u][/\\p{L}/u-z0-9_]*")]
     Ident,
-    #[token("let")]
-    LetKw,
     #[token("fn")]
     FnKw,
+    #[token("struct")]
+    StructKw,
+    #[token("trait")]
+    TraitKw,
+    #[token("::")]
+    ConstKw,
+    #[token(":=")]
+    VariableKw,
+    #[token("Type")]
+    TypeKw,
+    #[token("self")]
+    SelfVarKw,
+    #[token("Self")]
+    SelfTypeKw,
 
-    #[regex("[0-9]+", priority = 2)]
-    Integer,
-    #[regex("([0-9]*[.])?[0-9]+")]
-    Float,
+    #[regex("([0-9][0-9_]*)?\\.?[0-9_]+([eE][-+]?[0-9_]+)?")]
+    Number,
 
     #[token("!")]
     Bang,
@@ -52,8 +62,6 @@ pub enum TokenKind {
     Equals,
     #[token("==")]
     Equals2,
-    #[token("===")]
-    Equals3,
 
     #[token("%")]
     Percent,
@@ -77,28 +85,27 @@ pub enum TokenKind {
     Quote,
     #[token("\'")]
     SingleQuote,
-
+    #[token("`")]
+    Grave,
+    #[token("->")]
+    Arrow,
     // brackets
+    #[token("{")]
+    LCurlyBracket,
+    #[token("}")]
+    RCurlyBracket,
     #[token("(")]
     LRoundBracket,
     #[token(")")]
     RRoundBracket,
     #[token("<")]
     LAngledBracket,
-    #[token("<<")]
-    LAngledBracket2,
     #[token(">")]
     RAngledBracket,
-    #[token(">>")]
-    RAngledBracket2,
     #[token("[")]
     LSquareBracket,
     #[token("]")]
     RSquareBracket,
-    #[token("{")]
-    LCurlyBracket,
-    #[token("}")]
-    RCurlyBracket,
 }
 
 impl TokenKind {
@@ -113,11 +120,16 @@ impl fmt::Display for TokenKind {
             TokenKind::Error => "unrecognized token",
             TokenKind::Comment => "comment",
             TokenKind::Whitespace => "whitespace",
+            TokenKind::FnKw => "fn",
+            TokenKind::StructKw => "struct",
+            TokenKind::TraitKw => "trait",
             TokenKind::Ident => "identifier",
-            TokenKind::LetKw => "'let'",
-            TokenKind::FnKw => "'fn'",
-            TokenKind::Integer => "default integer",
-            TokenKind::Float => "default float",
+            TokenKind::TypeKw => "type",
+            TokenKind::SelfVarKw => "'self'",
+            TokenKind::SelfTypeKw => "'Self'",
+            TokenKind::ConstKw => "::",
+            TokenKind::VariableKw => ":=",
+            TokenKind::Number => "number",
             TokenKind::Bang => "!",
             TokenKind::Quest => "'?'",
             TokenKind::Plus => "'+'",
@@ -132,7 +144,6 @@ impl fmt::Display for TokenKind {
             TokenKind::Pipe2 => "'||'",
             TokenKind::Equals => "'='",
             TokenKind::Equals2 => "'=='",
-            TokenKind::Equals3 => "'==='",
             TokenKind::Percent => "'%'",
             TokenKind::Dollar => "'$'",
             TokenKind::Hashtag => "'#'",
@@ -144,16 +155,16 @@ impl fmt::Display for TokenKind {
             TokenKind::Semicolon => "';'",
             TokenKind::Quote => "'\"'",
             TokenKind::SingleQuote => "'''",
+            TokenKind::Grave => "'`'",
+            TokenKind::Arrow => "->",
+            TokenKind::LCurlyBracket => "'{'",
+            TokenKind::RCurlyBracket => "'}'",
             TokenKind::LRoundBracket => "'('",
             TokenKind::RRoundBracket => "')'",
             TokenKind::LAngledBracket => "'<'",
-            TokenKind::LAngledBracket2 => "'<<'",
             TokenKind::RAngledBracket => "'>'",
-            TokenKind::RAngledBracket2 => "'>>'",
             TokenKind::LSquareBracket => "'['",
             TokenKind::RSquareBracket => "']'",
-            TokenKind::LCurlyBracket => "'{'",
-            TokenKind::RCurlyBracket => "'}'",
         })
     }
 }
@@ -171,37 +182,78 @@ mod lexer_tests {
     }
 
     #[test]
-    fn spaces() {
+    fn comments() {
+        assert("//This is a comment", TokenKind::Comment);
+    }
+
+    #[test]
+    fn whitespaces() {
         assert(" ", TokenKind::Whitespace);
         assert("   ", TokenKind::Whitespace);
-    }
-
-    #[test]
-    fn fn_keyword() {
-        assert("fn", TokenKind::FnKw);
-    }
-
-    #[test]
-    fn let_keyword() {
-        assert("let", TokenKind::LetKw);
+        assert("\n", TokenKind::Whitespace);
+        assert("    \n ", TokenKind::Whitespace);
     }
 
     #[test]
     fn ident() {
         assert("Aksdf123", TokenKind::Ident);
         assert("SDFSLS3234DSFD", TokenKind::Ident);
+        assert("안녕하세요", TokenKind::Ident);
+        assert("안녕하세요3", TokenKind::Ident);
+        assert("Gerät3是", TokenKind::Ident);
     }
 
     #[test]
-    fn integer() {
-        assert("123", TokenKind::Integer);
-        assert("41242343", TokenKind::Integer);
+    fn struct_kw() {
+        assert("struct", TokenKind::StructKw);
     }
 
     #[test]
-    fn float() {
-        assert(".13", TokenKind::Float);
-        assert("2535.324", TokenKind::Float);
+    fn trait_kw() {
+        assert("trait", TokenKind::TraitKw);
+    }
+
+    #[test]
+    fn const_kw() {
+        assert("::", TokenKind::ConstKw);
+    }
+
+    #[test]
+    fn variable_kw() {
+        assert(":=", TokenKind::VariableKw);
+    }
+
+    #[test]
+    fn self_var_kw() {
+        assert("self", TokenKind::SelfVarKw);
+    }
+
+    #[test]
+    fn self_type_kw() {
+        assert("Self", TokenKind::SelfTypeKw);
+    }
+
+    #[test]
+    fn number() {
+        assert("123", TokenKind::Number);
+        assert("41242343", TokenKind::Number);
+        assert(".13", TokenKind::Number);
+        assert("2535.324", TokenKind::Number);
+        assert("2535.324e10", TokenKind::Number);
+        assert("23_629_349_234", TokenKind::Number);
+        assert("2_____4", TokenKind::Number);
+        assert("2_490.0", TokenKind::Number);
+        assert("2_490.023_423_7", TokenKind::Number);
+    }
+
+    #[test]
+    fn bang() {
+        assert("!", TokenKind::Bang);
+    }
+
+    #[test]
+    fn quest() {
+        assert("?", TokenKind::Quest);
     }
 
     #[test]
@@ -230,8 +282,28 @@ mod lexer_tests {
     }
 
     #[test]
-    fn double_circumflex() {
+    fn circumflex2() {
         assert("^^", TokenKind::Circumflex2);
+    }
+
+    #[test]
+    fn and() {
+        assert("&", TokenKind::And);
+    }
+
+    #[test]
+    fn and2() {
+        assert("&&", TokenKind::And2);
+    }
+
+    #[test]
+    fn pipe() {
+        assert("|", TokenKind::Pipe);
+    }
+
+    #[test]
+    fn pipe2() {
+        assert("||", TokenKind::Pipe2);
     }
 
     #[test]
@@ -240,12 +312,107 @@ mod lexer_tests {
     }
 
     #[test]
-    fn l_brace() {
+    fn equals2() {
+        assert("==", TokenKind::Equals2);
+    }
+
+    #[test]
+    fn percent() {
+        assert("%", TokenKind::Percent);
+    }
+
+    #[test]
+    fn dollar() {
+        assert("$", TokenKind::Dollar);
+    }
+
+    #[test]
+    fn hashtag() {
+        assert("#", TokenKind::Hashtag);
+    }
+
+    #[test]
+    fn at() {
+        assert("@", TokenKind::At);
+    }
+
+    #[test]
+    fn underscore() {
+        assert("_", TokenKind::Underscore);
+    }
+
+    #[test]
+    fn dot() {
+        assert(".", TokenKind::Dot);
+    }
+
+    #[test]
+    fn comma() {
+        assert(",", TokenKind::Comma);
+    }
+
+    #[test]
+    fn colon() {
+        assert(":", TokenKind::Colon);
+    }
+
+    #[test]
+    fn semicolon() {
+        assert(";", TokenKind::Semicolon);
+    }
+
+    #[test]
+    fn quote() {
+        assert("\"", TokenKind::Quote);
+    }
+
+    #[test]
+    fn single_quote() {
+        assert("\'", TokenKind::SingleQuote);
+    }
+
+    #[test]
+    fn grave() {
+        assert("`", TokenKind::Grave);
+    }
+
+    #[test]
+    fn l_round_bracket() {
+        assert("(", TokenKind::LRoundBracket);
+    }
+
+    #[test]
+    fn r_round_bracket() {
+        assert(")", TokenKind::RRoundBracket);
+    }
+
+    #[test]
+    fn l_angled_bracket() {
+        assert("<", TokenKind::LAngledBracket);
+    }
+
+    #[test]
+    fn r_angled_bracket() {
+        assert(">", TokenKind::RAngledBracket);
+    }
+
+    #[test]
+    fn l_square_bracket() {
+        assert("[", TokenKind::LSquareBracket);
+    }
+
+    #[test]
+    fn r_square_bracket() {
+        assert("]", TokenKind::RSquareBracket);
+    }
+
+    #[test]
+    fn l_curly_bracket() {
         assert("{", TokenKind::LCurlyBracket);
     }
 
     #[test]
-    fn r_brace() {
+    fn r_curly_bracket() {
         assert("}", TokenKind::RCurlyBracket);
     }
 

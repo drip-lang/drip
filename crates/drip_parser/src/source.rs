@@ -48,6 +48,26 @@ impl<'l, 'input> Source<'l, 'input> {
         }
     }
 
+    pub fn eat(&mut self, kinds: &[TokenKind]) {
+        while self.at_ignore(kinds) {
+            self.cursor += 1;
+        }
+    }
+
+    fn at_ignore(&self, kinds: &[TokenKind]) -> bool {
+        let token = self.peek_kind_raw();
+        if token.is_none() {
+            return false;
+        }
+        let token = token.unwrap();
+        for kind in kinds {
+            if *kind == token {
+                return true;
+            }
+        }
+        false
+    }
+
     fn at_trivia(&self) -> bool {
         self.peek_kind_raw().map_or(false, TokenKind::is_trivia)
     }
