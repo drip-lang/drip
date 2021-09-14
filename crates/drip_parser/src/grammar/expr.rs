@@ -97,7 +97,7 @@ fn variable_ref(p: &mut Parser) -> CompletedMarker {
 
     let marker = p.start();
     p.bump();
-    marker.complete(p, SyntaxKind::Literal)
+    marker.complete(p, SyntaxKind::VariableRef)
 }
 
 fn prefix_expr(p: &mut Parser) -> CompletedMarker {

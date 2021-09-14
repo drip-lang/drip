@@ -91,6 +91,17 @@ Root@0..3
     }
 
     #[test]
+    fn parse_variable_ref() {
+        check(
+            "counter",
+            expect![[r#"
+Root@0..7
+  VariableRef@0..7
+    Ident@0..7 "counter""#]],
+        );
+    }
+
+    #[test]
     fn parse_left_associative_infix_expression() {
         check(
             "1+2+3+4",
@@ -297,7 +308,7 @@ Root@0..7
 Root@0..4
   RoundBracketExpr@0..4
     LRoundBracket@0..1 "("
-    Literal@1..4
+    VariableRef@1..4
       Ident@1..4 "foo"
 error at 1..4: expected '+', '-', '*', '/' or ')'"#]],
         );

@@ -8,6 +8,7 @@ main :: () {
     control_flow()
     structs()
     traits()
+    iterators()
 }
 
 variables :: () {
@@ -184,4 +185,8 @@ Cat <| Sound :: impl {
     make_sound :: () {
         println("meow")
     }
+}
+
+iterators :: () {
+
 }

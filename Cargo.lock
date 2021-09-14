@@ -111,11 +111,32 @@ name = "drip"
 version = "0.1.0"
 dependencies = [
  "color-eyre",
+ "drip_ast",
  "drip_parser",
  "drop_bomb",
  "expect-test",
  "eyre",
  "rowan",
+]
+
+[[package]]
+name = "drip_ast"
+version = "0.1.0"
+dependencies = [
+ "drip_parser",
+ "drip_syntax",
+ "text-size",
+]
+
+[[package]]
+name = "drip_hir"
+version = "0.1.0"
+dependencies = [
+ "drip_ast",
+ "drip_parser",
+ "drip_syntax",
+ "la-arena",
+ "smol_str",
 ]
 
 [[package]]
@@ -204,6 +225,12 @@ name = "indenter"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce23b50ad8242c51a442f3ff322d56b02f08852c77e4c0b4d3fd684abc89c683"
+
+[[package]]
+name = "la-arena"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d43db9f547ba2787bdeac81ef97ccc80784f385b3b39b4d50344270629a2bee3"
 
 [[package]]
 name = "lazy_static"
@@ -388,6 +415,12 @@ checksum = "740223c51853f3145fe7c90360d2d4232f2b62e3449489c207eccde818979982"
 dependencies = [
  "lazy_static",
 ]
+
+[[package]]
+name = "smol_str"
+version = "0.1.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b203e79e90905594272c1c97c7af701533d42adaab0beb3859018e477d54a3b0"
 
 [[package]]
 name = "syn"

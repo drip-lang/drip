@@ -10,6 +10,7 @@ members = ["crates/*"]
 
 [dependencies]
 drip_parser = { path = "crates/drip_parser", version = "0.1"}
+drip_ast = { path = "crates/drip_ast", version = "0.1" }
 
 rowan = "0.13.2"
 eyre = "0.6.5"

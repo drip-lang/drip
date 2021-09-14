@@ -18,6 +18,7 @@ pub enum SyntaxKind {
 
     ConstDef,
     VariableDef,
+    VariableRef,
     AssignDef,
 
     FnDef,
