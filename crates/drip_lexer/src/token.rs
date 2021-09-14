@@ -14,6 +14,12 @@ pub enum TokenKind {
     Ident,
     #[token("fn")]
     FnKw,
+
+    #[token("use")]
+    UseKw,
+    #[token("extern")]
+    ExternKw,
+
     #[token("struct")]
     StructKw,
     #[token("trait")]
@@ -22,6 +28,7 @@ pub enum TokenKind {
     ConstKw,
     #[token(":=")]
     VariableKw,
+
     #[token("Type")]
     TypeKw,
     #[token("self")]
@@ -165,6 +172,8 @@ impl fmt::Display for TokenKind {
             TokenKind::RAngledBracket => "'>'",
             TokenKind::LSquareBracket => "'['",
             TokenKind::RSquareBracket => "']'",
+            TokenKind::UseKw => "use",
+            TokenKind::ExternKw => "extern",
         })
     }
 }

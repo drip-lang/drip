@@ -94,6 +94,10 @@ impl<'l, 'input> Parser<'l, 'input> {
     }
 
     pub(crate) fn peek(&mut self) -> Option<TokenKind> {
-        self.source.peek_kind()
+        self.source.peek()
+    }
+
+    pub(crate) fn peek_nth(&mut self, nth: isize) -> Option<TokenKind> {
+        self.source.peek_nth_raw(nth)
     }
 }

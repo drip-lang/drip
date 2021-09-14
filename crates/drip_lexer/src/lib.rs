@@ -42,3 +42,9 @@ pub struct Token<'a> {
     pub text: &'a str,
     pub range: TextRange,
 }
+
+impl<'a> Token<'a> {
+    pub fn is_trivia(&'a self) -> bool {
+        self.kind.is_trivia()
+    }
+}

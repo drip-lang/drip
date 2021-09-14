@@ -1,8 +1,8 @@
 use crate::Literal;
-use std::fmt;
 use drip_syntax::SyntaxNode;
-use text_size::TextRange;
+use std::fmt;
 use std::fmt::Formatter;
+use text_size::TextRange;
 
 #[derive(Debug, PartialEq)]
 pub struct ValidationError {
@@ -12,11 +12,12 @@ pub struct ValidationError {
 
 impl fmt::Display for ValidationError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f,
-               "error at {}..{}: {}",
-               u32::from(self.range.start()),
-               u32::from(self.range.end()),
-               self.kind,
+        write!(
+            f,
+            "error at {}..{}: {}",
+            u32::from(self.range.start()),
+            u32::from(self.range.end()),
+            self.kind,
         )
     }
 }
@@ -54,7 +55,7 @@ fn validate_literal(literal: Literal, errors: &mut Vec<ValidationError>) {
     if literal.parse().is_none() {
         errors.push(ValidationError {
             kind: ValidationErrorKind::NumberLiteralTooLarge,
-            range: literal.0.first_token().unwrap().text_range()
+            range: literal.0.first_token().unwrap().text_range(),
         })
     }
 }

@@ -11,6 +11,29 @@ impl<'l, 'input> Source<'l, 'input> {
         Self { tokens, cursor: 0 }
     }
 
+    pub fn peek(&mut self) -> Option<TokenKind> {
+        self.eat_trivia();
+        self.peek_kind_raw()
+    }
+
+    pub fn peek_nth_raw(&mut self, nth: isize) -> Option<TokenKind> {
+        let mut counter = 0;
+        let mut nth_counter = 0;
+        while nth_counter <= nth {
+            let token = self.tokens.get(self.cursor + counter);
+            if token.is_none() {
+                return None;
+            }
+            if !token.unwrap().is_trivia() {
+                nth_counter += 1;
+            }
+            counter += 1;
+        }
+        self.tokens
+            .get(self.cursor + counter - 1)
+            .map(|Token { kind, .. }| *kind)
+    }
+
     pub fn next_token(&mut self) -> Option<&'l Token<'input>> {
         self.eat_trivia();
 
@@ -18,11 +41,6 @@ impl<'l, 'input> Source<'l, 'input> {
         self.cursor += 1;
 
         Some(token)
-    }
-
-    pub fn peek_kind(&mut self) -> Option<TokenKind> {
-        self.eat_trivia();
-        self.peek_kind_raw()
     }
 
     pub fn peek_token(&mut self) -> Option<&Token> {

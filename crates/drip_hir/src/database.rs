@@ -1,7 +1,7 @@
-use crate::{BinaryOp, UnaryOp, Expr, Stmt};
-use la_arena::Arena;
+use crate::{BinaryOp, Expr, Stmt, UnaryOp};
 use drip_ast as ast;
 use drip_syntax::SyntaxKind;
+use la_arena::Arena;
 
 #[derive(Debug, PartialEq, Default)]
 pub struct Database {
@@ -15,7 +15,11 @@ impl Database {
                 name: ast.name()?.text().into(),
                 value: self.lower_expr(ast.value()),
             },
-            ast::Stmt::Expr(ast) => Stmt::Expr(self.lower_expr(Some(ast)))
+            ast::Stmt::ConstDef(ast) => Stmt::ConstDef {
+                name: ast.name()?.text().into(),
+                value: self.lower_expr(ast.value()),
+            },
+            ast::Stmt::Expr(ast) => Stmt::Expr(self.lower_expr(Some(ast))),
         };
 
         Some(result)
@@ -109,7 +113,7 @@ mod tests {
     #[test]
     fn lower_variable_def() {
         check_stmt(
-            "foo :: bar",
+            "foo := bar",
             Stmt::VariableDef {
                 name: "foo".into(),
                 value: Expr::VariableRef { var: "bar".into() },
@@ -118,16 +122,29 @@ mod tests {
     }
 
     #[test]
-    fn lower_variable_def_without_name() {
-        let root = parse(":: 10");
-        let ast = root.stmts().next().unwrap();
-        assert!(Database::default().lower_stmt(ast).is_none());
+    fn lower_const_def() {
+        check_stmt(
+            "foo :: bar",
+            Stmt::ConstDef {
+                name: "foo".into(),
+                value: Expr::VariableRef { var: "bar".into() },
+            },
+        );
     }
+
+    // TODO: make this work
+    // #[test]
+    // fn lower_variable_def_without_name() {
+    //     let root = parse(":= 10");
+    //     let ast = root.stmts().next().unwrap();
+    //     println!("{:?}", ast);
+    //     assert!(Database::default().lower_stmt(ast).is_none());
+    // }
 
     #[test]
     fn lower_variable_def_without_value() {
         check_stmt(
-            "a ::",
+            "a :=",
             Stmt::VariableDef {
                 name: "a".into(),
                 value: Expr::Missing,

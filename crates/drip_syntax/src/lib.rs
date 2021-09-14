@@ -7,9 +7,12 @@ use std::convert::TryFrom;
 pub enum SyntaxKind {
     Root,
     Error,
+    Tombstone,
+
     Comment,
     Whitespace,
 
+    Expression,
     InfixExpr,
     PrefixExpr,
 
@@ -20,6 +23,9 @@ pub enum SyntaxKind {
     VariableDef,
     VariableRef,
     AssignDef,
+
+    UseKw,
+    ExternKw,
 
     FnDef,
     FnParamListDef,
@@ -172,6 +178,8 @@ impl From<TokenKind> for SyntaxKind {
             TokenKind::LCurlyBracket => SyntaxKind::LCurlyBracket,
             TokenKind::RCurlyBracket => SyntaxKind::RCurlyBracket,
             TokenKind::Comment => SyntaxKind::Comment,
+            TokenKind::UseKw => SyntaxKind::UseKw,
+            TokenKind::ExternKw => SyntaxKind::ExternKw,
         }
     }
 }

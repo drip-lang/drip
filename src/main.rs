@@ -25,13 +25,14 @@ fn main() -> color_eyre::Result<()> {
 
         let root = drip_ast::Root::cast(syntax).unwrap();
 
-        dbg!(root.stmts().filter_map(|stmt| if let drip_ast::Stmt::VariableDef(var_def) = stmt {
-            Some(var_def.value())
-        } else {
-            None
-        })
+        dbg!(root
+            .stmts()
+            .filter_map(|stmt| if let drip_ast::Stmt::VariableDef(var_def) = stmt {
+                Some(var_def.value())
+            } else {
+                None
+            })
             .collect::<Vec<_>>());
-
 
         input.clear();
     }

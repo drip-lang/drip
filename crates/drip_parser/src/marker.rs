@@ -28,6 +28,19 @@ impl Marker {
 
         CompletedMarker { pos: self.pos }
     }
+
+    pub(crate) fn abandon(mut self, p: &mut Parser) {
+        self.completed.defuse();
+        if self.pos == p.events.len() - 1 {
+            match p.events.pop() {
+                Some(Event::StartNode {
+                    kind: SyntaxKind::Tombstone,
+                    offset: None,
+                }) => (),
+                _ => unreachable!(),
+            }
+        }
+    }
 }
 
 pub struct CompletedMarker {

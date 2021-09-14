@@ -9,6 +9,7 @@ type ExprIdx = Idx<Expr>;
 #[derive(Debug, PartialEq)]
 pub enum Stmt {
     VariableDef { name: SmolStr, value: Expr },
+    ConstDef { name: SmolStr, value: Expr },
     Expr(Expr),
 }
 

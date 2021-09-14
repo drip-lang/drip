@@ -1,5 +1,5 @@
-use drip_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 use drip_syntax::SyntaxKind::PrefixExpr;
+use drip_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 pub mod validation;
 
@@ -23,6 +23,7 @@ impl Root {
 #[derive(Debug)]
 pub enum Stmt {
     VariableDef(VariableDef),
+    ConstDef(ConstDef),
     Expr(Expr),
 }
 
@@ -30,6 +31,7 @@ impl Stmt {
     pub fn cast(node: SyntaxNode) -> Option<Self> {
         let result = match node.kind() {
             SyntaxKind::VariableDef => Self::VariableDef(VariableDef(node)),
+            SyntaxKind::ConstDef => Self::ConstDef(ConstDef(node)),
             _ => Self::Expr(Expr::cast(node)?),
         };
 
@@ -43,7 +45,7 @@ pub enum Expr {
     UnaryExpr(UnaryExpr),
     Literal(Literal),
     RoundBracketExpr(RoundBracketExpr),
-    VariableRef(VariableRef)
+    VariableRef(VariableRef),
 }
 
 impl Expr {
@@ -133,7 +135,24 @@ pub struct VariableDef(SyntaxNode);
 
 impl VariableDef {
     pub fn name(&self) -> Option<SyntaxToken> {
-        self.0.children_with_tokens()
+        self.0
+            .children_with_tokens()
+            .filter_map(SyntaxElement::into_token)
+            .find(|token| token.kind() == SyntaxKind::Ident)
+    }
+
+    pub fn value(&self) -> Option<Expr> {
+        self.0.children().find_map(Expr::cast)
+    }
+}
+
+#[derive(Debug)]
+pub struct ConstDef(SyntaxNode);
+
+impl ConstDef {
+    pub fn name(&self) -> Option<SyntaxToken> {
+        self.0
+            .children_with_tokens()
             .filter_map(SyntaxElement::into_token)
             .find(|token| token.kind() == SyntaxKind::Ident)
     }
